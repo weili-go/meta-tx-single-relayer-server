@@ -1,0 +1,30 @@
+{
+  "name": "gmo-relay-server-example",
+  "version": "0.1.0",
+  "description": "GYEN relay server example",
+  "main": "relay-server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "Ethereum",
+    "web3.js",
+    "ethers.js"
+  ],
+  "author": "wei li <wei-li@gmo.jp>",
+  "license": "ISC",
+  "dependencies": {
+    "axios": "^0.21.1",
+    "compression": "^1.7.4",
+    "dotenv": "^8.2.0",
+    "ethereumjs-util": "^7.0.3",
+    "ethers": "^5.0.7",
+    "express": "^4.17.1",
+    "helmet": "^4.2.0",
+    "http-auth": "^4.1.2",
+    "https": "^1.0.0",
+    "morgan": "^1.10.0",
+    "solc": "^0.6.12",
+    "web3": "^1.2.11"
+  }
+}
