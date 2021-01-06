@@ -3,6 +3,8 @@ const EthUtil = require("ethereumjs-util");
 require('dotenv').config();
 const fs = require('fs');
 const { abi } = JSON.parse(fs.readFileSync('./jsons/Token_v2.json'));
+const Mutex = require('async-mutex').Mutex;
+const mutex = new Mutex();
 
 const wait = (milliseconds) => {
   return new Promise((resolve) => setTimeout(resolve, milliseconds));
@@ -41,9 +43,15 @@ const models = {
 
         //get nonce
         let nonce = await signer.getTransactionCount();
+
+
         if(nonceLatest < nonce){
             nonceLatest = nonce; 
         }
+
+        // mutex
+        const release = await mutex.acquire();
+        console.log("mutex start => ", nonceLatest);
 
         let overrides = {
       
@@ -54,7 +62,7 @@ const models = {
           gasPrice: ethers.utils.parseUnits('10', 'gwei'),
       
           // The nonce to use in the transaction
-          nonce: nonceLatest,
+          nonce: nonceLatest++,
       
           // The amount to send with the transaction (i.e. msg.value)
           //value: utils.parseEther('1.0'),
@@ -72,22 +80,28 @@ const models = {
           
           console.log("estimated gas=> ", estimated.toString());
         } catch(err){
+          nonceLatest--;
             console.log("estimated error =>\n",err);
             res.status(200);
 
             res.body = { 'status': 200, 'success': false, 'result': err.reason }
             return next(null, req, res, next);
-        }
+        } finally {
+
+          console.log("mutex released");
+          release();
+       }
         
         // execute the transaction
         try{
+
             const tx = await contract.transferWithAuthorization(from, to, value, validAfter, validBefore, nonceValueAfter, v, r, s, overrides);
             console.log('Waiting Mining transaction...');
             console.log(`https://${network}.etherscan.io/tx/${tx.hash}`);
             // Waiting for the transaction to be mined
             const receipt = await tx.wait();
             // nonce countup
-            nonceLatest++;
+            //nonceLatest++;
 
             // The transaction is now on chain!
             //console.log(`Mined in block ${receipt.blockNumber}`);
